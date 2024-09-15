@@ -28,6 +28,16 @@ class TestHomePage(unittest.TestCase):
         self.assertIn(b'First Name', response.data)  # Check for a field called 'First Name'
         self.assertIn(b'Last Name', response.data)  # Check for a field called 'Last Name'
 
+    def test_post_registration_form(self):
+        # Simulate a POST request to '/register'
+        response = self.app.post('/register', data={
+            'first_name': 'Hello',
+            'last_name': 'World'
+        })
+        self.assertEqual(response.status_code, 200)  # The page should load successfully
+        self.assertIn(b'Registration Successful', response.data)  # Check for success message
+        self.assertIn(b'Hello World', response.data)  # Ensure the student's name appears in the response
+
 
 if __name__ == '__main__':
     unittest.main()
