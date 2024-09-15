@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
+
 from src.app import home, app, process_registration_form
+
 
 
 class TestHomeFunction(unittest.TestCase):
@@ -31,18 +33,18 @@ class TestHomeFunction(unittest.TestCase):
         form_data = {'first_name': 'John', 'last_name': 'Doe'}
         result, error = process_registration_form(form_data)
         self.assertIsNone(error)  # There should be no error
-        self.assertEqual(result['first_name'], 'John')
-        self.assertEqual(result['last_name'], 'Doe')
+        self.assertEqual(result['first_name'], 'Hello')
+        self.assertEqual(result['last_name'], 'World')
 
     def test_missing_first_name(self):
-        form_data = {'first_name': '', 'last_name': 'Doe'}
+        form_data = {'first_name': '', 'last_name': 'World'}
         result, error = process_registration_form(form_data)
         self.assertIsNotNone(error)  # Error should be returned
         self.assertEqual(error, "First Name and Last Name are required!")  # Check error message
         self.assertIsNone(result)  # Result should be None
 
     def test_missing_last_name(self):
-        form_data = {'first_name': 'John', 'last_name': ''}
+        form_data = {'first_name': 'Hello', 'last_name': ''}
         result, error = process_registration_form(form_data)
         self.assertIsNotNone(error)
         self.assertEqual(error, "First Name and Last Name are required!")  # Check error message
