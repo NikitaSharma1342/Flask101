@@ -20,6 +20,14 @@ class TestHomePage(unittest.TestCase):
         response = self.app.get('/')
         self.assertIn(b'<title>Home</title>', response.data)  # Check that the title is present
 
+    def test_get_registration_form(self):
+        # Simulate a GET request to '/register'
+        response = self.app.get('/register')
+        self.assertEqual(response.status_code, 200)  # The page should load successfully
+        self.assertIn(b'<form', response.data)  # Check if a form is present in the response
+        self.assertIn(b'First Name', response.data)  # Check for a field called 'First Name'
+        self.assertIn(b'Last Name', response.data)  # Check for a field called 'Last Name'
+
 
 if __name__ == '__main__':
     unittest.main()
