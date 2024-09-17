@@ -29,20 +29,30 @@ def home():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def show_registration_form():
+def register_student():
     if request.method == 'POST':
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
 
-        # Save student to the database
-        new_student = Student(first_name=first_name, last_name=last_name)
-        db.session.add(new_student)
-        db.session.commit()
+        # Simple form validation
+        if not first_name or not last_name:
+            return "Error: Both fields are required", 400
 
+        # Save student data
+        save_student(first_name, last_name)
         return render_template('registration_success.html', first_name=first_name, last_name=last_name)
 
+    # For GET request, return the registration form
     return render_template('register.html')
 
 
+# Separate function for saving student to the database
+def save_student(first_name, last_name):
+    new_student = Student(first_name=first_name, last_name=last_name)
+    db.session.add(new_student)
+    db.session.commit()
+
+
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True)
