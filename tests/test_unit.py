@@ -4,7 +4,6 @@ from unittest.mock import patch
 from src.app import home, app, process_registration_form
 
 
-
 class TestHomeFunction(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
@@ -30,14 +29,14 @@ class TestHomeFunction(unittest.TestCase):
             self.assertIn('Welcome, Hello World!', response)
 
     def test_valid_form_data(self):
-        form_data = {'first_name': 'John', 'last_name': 'Doe'}
+        form_data = {'first_name': 'Hello', 'last_name': 'World'}
         result, error = process_registration_form(form_data)
         self.assertIsNone(error)  # There should be no error
         self.assertEqual(result['first_name'], 'Hello')
         self.assertEqual(result['last_name'], 'World')
 
     def test_missing_first_name(self):
-        form_data = {'first_name': '', 'last_name': 'World'}
+        form_data = {'first_name': 'Hello', 'last_name': 'World'}
         result, error = process_registration_form(form_data)
         self.assertIsNotNone(error)  # Error should be returned
         self.assertEqual(error, "First Name and Last Name are required!")  # Check error message
