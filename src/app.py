@@ -7,6 +7,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
+# Define the Student model
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+
+
 # Helper function to process the form data
 def process_registration_form(form_data):
     first_name = form_data.get('first_name')
@@ -23,19 +30,18 @@ def home():
 
 @app.route('/register', methods=['GET', 'POST'])
 def show_registration_form():
-    error = None
     if request.method == 'POST':
-        form_data, error = process_registration_form(request.form)
-        if error:
-            # If validation fails, pass the error to the template
-            return render_template('register.html', error=error)
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
 
-        # If validation passed, render the success template
-        return render_template('registration_success.html', first_name=form_data['first_name'],
-                               last_name=form_data['last_name'])
+        # Save student to the database
+        new_student = Student(first_name=first_name, last_name=last_name)
+        db.session.add(new_student)
+        db.session.commit()
 
-    # Render the registration form without any error initially
-    return render_template('register.html', error=error)
+        return render_template('registration_success.html', first_name=first_name, last_name=last_name)
+
+    return render_template('register.html')
 
 
 if __name__ == '__main__':

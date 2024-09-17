@@ -7,11 +7,19 @@ class TestHomePage(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Use an in-memory database for testing
         self.app = app.test_client()
+
+        # Push the app context to avoid "working outside of application context" error
+        self.app_context = app.app_context()
+        self.app_context.push()
+
         db.create_all()  # Create all tables
 
     def tearDown(self):
         db.session.remove()
-        db.drop_all()  # Drop all tables after each test
+        db.drop_all()
+
+        # Pop the app context after the tests
+        self.app_context.pop()
 
     def test_home_page(self):
         # Simulate a GET request to the home page
