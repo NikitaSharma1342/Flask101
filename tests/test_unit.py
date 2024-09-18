@@ -1,13 +1,22 @@
 import unittest
 from unittest.mock import patch
 
-from src.app import home, app, process_registration_form
+from src.app import home, app, save_student, db
 
 
 class TestHomeFunction(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         self.app = app.test_client()
+        # Create tables
+        with app.app_context():
+            db.create_all()
+
+    def tearDown(self):
+        # Drop tables after the test
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
 
     @patch('src.app.render_template')
     def test_home_content(self, mock_render_template):
@@ -28,26 +37,32 @@ class TestHomeFunction(unittest.TestCase):
             response = app.view_functions['show_registration_form']()
             self.assertIn('Welcome, Hello World!', response)
 
-    def test_valid_form_data(self):
-        form_data = {'first_name': 'Hello', 'last_name': 'World'}
-        result, error = process_registration_form(form_data)
-        self.assertIsNone(error)  # There should be no error
-        self.assertEqual(result['first_name'], 'Hello')
-        self.assertEqual(result['last_name'], 'World')
+    # Test when db.session.add is mocked
+    @patch('src.app.db.session.add')
+    @patch('src.app.db.session.commit')
+    def test_post_registration_data(self, mock_commit, mock_add):
+        response = self.app.post('/register', data={
+            'first_name': 'Hello',
+            'last_name': 'World'
+        })
 
-    def test_missing_first_name(self):
-        form_data = {'first_name': 'Hello', 'last_name': 'World'}
-        result, error = process_registration_form(form_data)
-        self.assertIsNotNone(error)  # Error should be returned
-        self.assertEqual(error, "First Name and Last Name are required!")  # Check error message
-        self.assertIsNone(result)  # Result should be None
+        # Ensure the add and commit methods were called
+        mock_add.assert_called_once()
+        mock_commit.assert_called_once()
 
-    def test_missing_last_name(self):
-        form_data = {'first_name': 'Hello', 'last_name': ''}
-        result, error = process_registration_form(form_data)
-        self.assertIsNotNone(error)
-        self.assertEqual(error, "First Name and Last Name are required!")  # Check error message
-        self.assertIsNone(result)
+        # Verify the status code and the success message
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Registration Successful', response.data)
+
+    # Separate test mocking save_student instead of db calls
+    @patch('src.app.save_student')
+    def test_save_student_called(self, mock_save_student):
+        response = self.app.post('/register', data={
+            'first_name': 'Hello',
+            'last_name': 'World'
+        })
+        mock_save_student.assert_called_once_with('Hello', 'World')
+        self.assertEqual(response.status_code, 200)
 
 
 if __name__ == '__main__':

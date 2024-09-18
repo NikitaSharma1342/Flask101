@@ -14,14 +14,6 @@ class Student(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
 
 
-# Helper function to process the form data
-def process_registration_form(form_data):
-    first_name = form_data.get('first_name')
-    last_name = form_data.get('last_name')
-    if not first_name or not last_name:
-        return None, "First Name and Last Name are required!"
-    return {'first_name': first_name, 'last_name': last_name}, None
-
 
 @app.route('/')
 def home():
@@ -54,5 +46,7 @@ def save_student(first_name, last_name):
 
 
 if __name__ == '__main__':
-    db.create_all()
+    with app.app_context():
+        db.create_all()  # Ensure that tables are created
+
     app.run(debug=True)
